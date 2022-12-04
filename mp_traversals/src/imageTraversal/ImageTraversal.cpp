@@ -33,6 +33,14 @@ double ImageTraversal::calculateDelta(const HSLAPixel & p1, const HSLAPixel & p2
  */
 ImageTraversal::Iterator::Iterator() {
   /** @todo [Part 1] */
+  searchType_ = NULL;
+}
+
+ImageTraversal::Iterator::Iterator(ImageTraversal* searchType, Point & point, PNG & png, double tolerance) {
+  searchType_ = searchType;
+  png_ = png;
+  tolerance_ = tolerance;
+  current_ = point;
 }
 
 /**
@@ -42,6 +50,12 @@ ImageTraversal::Iterator::Iterator() {
  */
 ImageTraversal::Iterator & ImageTraversal::Iterator::operator++() {
   /** @todo [Part 1] */
+
+  if (!searchType_->empty()) {
+    current_ = searchType_->pop();
+    searchType_->add(current_);
+    current_ = searchType_->peek();
+  }
   return *this;
 }
 
@@ -52,7 +66,7 @@ ImageTraversal::Iterator & ImageTraversal::Iterator::operator++() {
  */
 Point ImageTraversal::Iterator::operator*() {
   /** @todo [Part 1] */
-  return Point(0, 0);
+  return current_;
 }
 
 /**
@@ -62,6 +76,17 @@ Point ImageTraversal::Iterator::operator*() {
  */
 bool ImageTraversal::Iterator::operator!=(const ImageTraversal::Iterator &other) {
   /** @todo [Part 1] */
-  return false;
+  bool thisEmpty = false; 
+  bool otherEmpty = false;
+
+  if (searchType_ == nullptr) { thisEmpty = true; }
+  if (other.searchType_ == nullptr) { otherEmpty = true; }
+
+  if (!thisEmpty)  { thisEmpty = searchType_->empty(); }
+  if (!otherEmpty) { otherEmpty = other.searchType_->empty(); }
+
+  if (thisEmpty && otherEmpty) return false;
+  else if ((!thisEmpty)&&(!otherEmpty)) return (searchType_ != other.searchType_);
+  else return true;
 }
 

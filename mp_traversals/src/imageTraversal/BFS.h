@@ -35,4 +35,12 @@ public:
 private:
   /** @todo [Part 1] */
   /** add private members here*/
+  bool visited(Point & point) const;
+  static double calculateDelta(const HSLAPixel & p1, const HSLAPixel & p2);
+
+  Point start_;
+  double tolerance_;
+  PNG png_;
+  std::queue<Point> queue_;
+  std::vector<std::vector<bool>> visited_;
 };

@@ -12,9 +12,7 @@
 #pragma once
 
 #include <vector>
-
 #include "util/coloredout.h"
-
 #include "cs225/point.h"
 
 using std::vector;
@@ -57,7 +55,7 @@ class KDTree
      *     cout << smallerDimVal(a, b, 2) << endl; // should print false
      *     cout << smallerDimVal(a, b, 1) << endl; // based on operator<, this should be true
      *
-     * @todo This function is required for Part 1.
+     * @todo This function is required for MP 5.1.
      * @param first Point to compare.
      * @param second Second point to compare.
      * @param curDim Dimension these points are being compared in.
@@ -83,7 +81,7 @@ class KDTree
      * For example:
      *
      *     Point<3> target(1, 3, 5);
-     *     Point<3> currentBest1(1, 3, 2);
+     *     Point<3> currentBest1(1, 3, 2);median
      *     Point<3> possibleBest1(2, 4, 4);
      *     Point<3> currentBest2(1, 3, 6);
      *     Point<3> possibleBest2(2, 4, 4);
@@ -94,7 +92,7 @@ class KDTree
      *     cout << shouldReplace(target, currentBest3, possibleBest3) << endl;
      *      // based on operator<, this should be false
      *
-     * @todo This function is required for Part 1.
+     * @todo This function is required for MP 5.1.
      * @param target The Point we want to be close to.
      * @param currentBest The Point that is currently our closest Point
      *    to target.
@@ -149,11 +147,24 @@ class KDTree
      * that "select pivotIndex between left and right" means that you
      * should choose a midpoint between the left and right indices.
      *
-     * @todo This function is required for Part 1.
+     * @todo This function is required for MP 5.1.
      * @param newPoints The vector of points to build your KDTree off of.
      */
     KDTree(const vector<Point<Dim>>& newPoints);
 
+    // Helper function for KDTree constructor
+    //void constructKD(vector<Point<Dim>>& newPoints, int left, int right,
+                                  //int dimension, KDTreeNode*& subroot);
+
+    // Group a list (ranging from indices left to right) into two parts:
+    // Those less than a certain element, and those greater than or equal to the element.
+    //int partition(vector<Point<Dim>>& list, int left, int right, size_t pivotIndex, int dimension);
+
+    // Returns the k-th smallest element of list within left..right inclusive
+    // (i.e. left <= k <= right).
+    // The search space within the array is changing for each round - but the list
+    // is still the same size. Thus, k does not need to be updated with each round.
+    
 
     /**
      * Copy constructor for KDTree.
@@ -175,6 +186,8 @@ class KDTree
      */
     ~KDTree();
 
+    //void _copy(KDTreeNode*& curr_node, KDTreeNode*& other);
+    //void _delete(KDTreeNode*& subroot);
     /**
      * Finds the closest point to the parameter point in the KDTree.
      *
@@ -225,15 +238,18 @@ class KDTree
      * (https://courses.engr.illinois.edu/cs225/sp2018/private/mps/5/moore-tutorial.pdf).
      *
      * @see There is [an example]
-     * (https://courses.engr.illinois.edu/cs225/sp2019/mps/mosaics/) in the MP instructions.
+     * (https://courses.engr.illinois.edu/cs225/sp2018/mps/5/) in the MP5 instruction.
      *
-     * @todo This function is required for Part 1.
+     * @todo This function is required for MP 5.1.
      * @param query The point we wish to find the closest neighbor to in the
      *  tree.
      * @return The closest point to a in the KDTree.
      */
     Point<Dim> findNearestNeighbor(const Point<Dim>& query) const;
 
+    //helper function for findNearestNeighbor
+    //void findNearestNeighbour(KDTreeNode* curr_node, Point<Dim> &currentBest,
+                             //Point<Dim> &query, size_t dimension) const;
     // functions used for grading:
 
     /**
@@ -251,7 +267,7 @@ class KDTree
     KDTreeNode *root;
     size_t size;
 
-    /** Helper function for grading */
+    /** Helper f//subroot must be passed by reference!!unction for grading */
     int getPrintData(KDTreeNode * subroot) const;
 
     /** Helper function for grading */
@@ -261,6 +277,29 @@ class KDTree
     /**
      * @todo Add your helper functions here.
      */
+
+     //Point<Dim> quickSelect(vector<Point<Dim>>& list, int dimension, size_t left, size_t right, size_t k);
+     size_t partition(vector<Point<Dim>>& list, int dimension, size_t left, size_t right, size_t pivotIndex);
+     //void createSubroot(vector<Point<Dim>>& points_, int dimension, size_t left, size_t right, KDTreeNode*& subRoot);
+
+
+  //Point<Dim> quickSelect(vector<Point<Dim>>& list, int left, int right, size_t k, int dimension);
+    // Helper function for KDTree constructor
+    void constructKD(vector<Point<Dim>>& newPoints, int left, int right,
+                                  int dimension, KDTreeNode*& subroot);
+
+    // Group a list (ranging from indices left to right) into two parts:
+    // Those less than a certain element, and those greater than or equal to the element.
+    //int partition(vector<Point<Dim>>& list, int left, int right, size_t pivotIndex, int dimension);
+
+    // Returns the k-th smallest element of list within left..right inclusive
+    // (i.e. left <= k <= right).
+    // The search space within the array is changing for each round - but the list
+    // is still the same size. Thus, k does not need to be updated with each round.
+    Point<Dim> quickSelect(vector<Point<Dim>>& list, int left, int right, size_t k, int dimension);
+Point<Dim> findNearestNeighbour(const Point<Dim>& query, KDTreeNode* subRoot, size_t dimension) const;
+void clear(KDTreeNode* subroot);
+void copy(KDTreeNode * subroot, KDTreeNode * othersubroot);
 };
 
 #include "kdtree.hpp"

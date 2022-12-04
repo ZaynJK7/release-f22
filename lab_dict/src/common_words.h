@@ -11,6 +11,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <set>
 
 using std::map;
 using std::vector;
@@ -51,7 +52,11 @@ class CommonWords
      */
     std::map<std::string, unsigned int> common;
 
+    std::set<string> word_set;
+
     /* helper functions */
+
+    bool check(string word, unsigned int n) const;
 
     /**
      * Initializes #file_word_maps.

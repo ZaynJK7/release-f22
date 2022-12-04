@@ -1,9 +1,14 @@
-/**
+        /**
  * @file btree.cpp
  * Implementation of a B-tree class which can be used as a generic dictionary
  * (insert-only). Designed to take advantage of caching to be faster than
  * standard balanced binary search trees.
+ *
+ * @author Matt Joras
+ * @date Winter 2013
  */
+
+using std::vector;
 
 /**
  * Finds the value associated with a given key.
@@ -25,10 +30,8 @@ V BTree<K, V>::find(const K& key) const
 template <class K, class V>
 V BTree<K, V>::find(const BTreeNode* subroot, const K& key) const
 {
-    /* TODO Finish this function */
-
+    /* TODO Your code goes here! */
     size_t first_larger_idx = insertion_idx(subroot->elements, key);
-
     /* If first_larger_idx is a valid index and the key there is the key we
      * are looking for, we are done. */
 
@@ -42,8 +45,15 @@ V BTree<K, V>::find(const BTreeNode* subroot, const K& key) const
      * a leaf and we didn't find the key in it, then we have failed to find it
      * anywhere in the tree and return the default V.
      */
-
-    return V();
+	if(!subroot->elements.empty()&&first_larger_idx < subroot->elements.size())
+	{
+		if(subroot->elements[first_larger_idx].key == key)
+			return subroot->elements[first_larger_idx].value;
+	}
+    if(subroot->is_leaf)
+		return V();
+	else
+		return find(subroot->children[first_larger_idx],key);
 }
 
 /**
@@ -56,13 +66,13 @@ template <class K, class V>
 void BTree<K, V>::insert(const K& key, const V& value)
 {
     /* Make the root node if the tree is empty. */
-    if (root == nullptr) {
+    if(root == nullptr) {
         root = new BTreeNode(true, order);
     }
     insert(root, DataPair(key, value));
     /* Increase height by one by tossing up one element from the old
      * root node. */
-    if (root->elements.size() >= order) {
+    if(root->elements.size() >= order) {
         BTreeNode* new_root = new BTreeNode(false, order);
         new_root->children.push_back(root);
         split_child(new_root, 0);
@@ -71,7 +81,7 @@ void BTree<K, V>::insert(const K& key, const V& value)
 }
 
 /**
- * Splits a child node of a BTreeNode. Called if the child became too
+ * Splits a child node of a BTreeNode. Called if the child became too 
  * large.
  * @param parent The parent whose child we are trying to split.
  * @param child_idx The index of the child in its parent's children
@@ -82,28 +92,28 @@ void BTree<K, V>::split_child(BTreeNode* parent, size_t child_idx)
 {
     /* Assume we are splitting the 3 6 8 child.
      * We want the following to happen.
-     *     | 2 |
+     *     | 2 | 
      *    /     \
      * | 1 |   | 3 | 6 | 8 |
      *
      *
-     * Insert a pointer into parent's children which will point to the
+     * Insert a pointer into parent's children which will point to the 
      * new right node. The new right node is empty at this point.
-     *     | 2 |   |
+     *     | 2 |   | 
      *    /     \
      * | 1 |   | 3 | 6 | 8 |
      *
      * Insert the mid element from the child into its new position in the
      * parent's elements. At this point the median is still in the child.
-     *     | 2 | 6 |
+     *     | 2 | 6 | 
      *    /     \
      * | 1 |   | 3 | 6 | 8 |
      *
      * Now we want to copy over the elements (and children) to the right
      * of the child median into the new right node, and make sure the left
-     * node only has the elements (and children) to the left of the child
+     * node only has the elements (and children) to the left of the child 
      * median.
-     *     | 2 | 6 |
+     *     | 2 | 6 | 
      *    /   /     \
      * | 1 | | 3 | | 8 |
      *
@@ -112,7 +122,7 @@ void BTree<K, V>::split_child(BTreeNode* parent, size_t child_idx)
     /* The child we want to split. */
     BTreeNode* child = parent->children[child_idx];
     /* The "left" node is the old child, the right child is a new node. */
-    BTreeNode* new_left = child;
+    BTreeNode* new_left = child; 
     BTreeNode* new_right = new BTreeNode(child->is_leaf, order);
 
     /* E.g.
@@ -124,7 +134,7 @@ void BTree<K, V>::split_child(BTreeNode* parent, size_t child_idx)
      * Mid element is at index (2 - 1) / 2 = 0 .
      * Mid child (bar) is at index 2 / 2 = 1 .
      * This definition is to make this BTree act like the visualization
-     * at
+     * at 
      * https://www.cs.usfca.edu/~galles/visualization/BTree.html
      */
     size_t mid_elem_idx = (child->elements.size() - 1) / 2;
@@ -139,8 +149,17 @@ void BTree<K, V>::split_child(BTreeNode* parent, size_t child_idx)
     /* Iterator for the middle child. */
     auto mid_child_itr = child->children.begin() + mid_child_idx;
 
-
     /* TODO Your code goes here! */
+	DataPair toInsert = *mid_elem_itr;
+	parent->elements.insert(elem_itr, toInsert);
+	parent->children.insert(child_itr,new_right);
+	new_right->elements.assign(mid_elem_itr+1,new_left->elements.end());
+	if(!new_left->is_leaf)
+		new_right->children.assign(mid_child_itr,new_left->children.end());
+	new_left->elements.assign(new_left->elements.begin(),mid_elem_itr);
+	if(!new_left->is_leaf)
+		new_left->children.assign(new_left->children.begin(),mid_child_itr);
+	return;
 }
 
 /**
@@ -153,16 +172,34 @@ void BTree<K, V>::split_child(BTreeNode* parent, size_t child_idx)
 template <class K, class V>
 void BTree<K, V>::insert(BTreeNode* subroot, const DataPair& pair)
 {
-    /* There are two cases to consider.
-     * If the subroot is a leaf node and the key doesn't exist subroot, we
+    /* There are two cases to consider. 
+     * If the subroot is a leaf node and the key doesn't exist subroot, we 
      * should simply insert the pair into subroot.
      * Otherwise (subroot is not a leaf and the key doesn't exist in subroot)
      * we need to figure out which child to insert into and call insert on it.
      * After this call returns we need to check if the child became too large
-     * and thus needs to be split to maintain order.
+     * and thus needs to be split to maintain order. 
      */
 
     size_t first_larger_idx = insertion_idx(subroot->elements, pair);
-
     /* TODO Your code goes here! */
+	if(!subroot->elements.empty()&&first_larger_idx < subroot->elements.size())
+	{
+		if(subroot->elements[first_larger_idx].key == pair.key)
+			return;
+	}
+	if(subroot->is_leaf)
+	{ 
+		subroot->elements.insert(subroot->elements.begin() + first_larger_idx, pair);
+	}
+	else
+	{
+		BTreeNode* newNode = subroot->children[first_larger_idx];
+		insert(newNode, pair);
+		if(newNode->elements.size() >= order)
+		{		
+			split_child(subroot, first_larger_idx);
+		}
+	}
+	return;
 }

@@ -8,6 +8,7 @@
 #include <cmath>
 #include <list>
 #include <stack>
+#include <set>
 
 #include "cs225/PNG.h"
 #include "../Point.h"
@@ -35,4 +36,12 @@ public:
 private:
 	/** @todo [Part 1] */
 	/** add private members here*/
+  bool beenVisited(Point & point) const;
+  static double calculateDelta(const HSLAPixel & p1, const HSLAPixel & p2);
+
+  Point start_;
+  double tolerance_;
+  PNG png_;
+  std::stack<Point> stack_;
+  std::vector<std::vector<bool>> visited_;
 };

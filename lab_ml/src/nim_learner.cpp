@@ -26,6 +26,26 @@
  */
 NimLearner::NimLearner(unsigned startingTokens) : g_(true, true) {
     /* Your code goes here! */
+    startingVertex_ = "p1-" + to_string(startingTokens);
+
+    for (int i = startingTokens; i >= 0; i--) {
+      Vertex cur_vertex1 = "p1-" + to_string(i);
+      Vertex cur_vertex2 = "p2-" + to_string(i);
+      g_.insertVertex(cur_vertex1);
+      g_.insertVertex(cur_vertex2);
+      if (i <= (int)startingTokens - 1) {
+        g_.insertEdge("p2-" + to_string(i + 1), cur_vertex1);
+        g_.setEdgeWeight("p2-" + to_string(i + 1), cur_vertex1, 0);
+        g_.insertEdge("p1-" + to_string(i + 1), cur_vertex2);
+        g_.setEdgeWeight("p1-" + to_string(i + 1), cur_vertex2, 0);
+      }
+      if (i <= (int)startingTokens - 2) {
+        g_.insertEdge("p2-" + to_string(i + 2), cur_vertex1);
+        g_.setEdgeWeight("p2-" + to_string(i + 2), cur_vertex1, 0);
+        g_.insertEdge("p1-" + to_string(i + 2), cur_vertex2);
+        g_.setEdgeWeight("p1-" + to_string(i + 2), cur_vertex2, 0);
+      }
+    }
 }
 
 /**
@@ -40,6 +60,23 @@ NimLearner::NimLearner(unsigned startingTokens) : g_(true, true) {
 std::vector<Edge> NimLearner::playRandomGame() const {
   vector<Edge> path;
  /* Your code goes here! */
+ Vertex cur_vertex = startingVertex_;
+	while (cur_vertex != "p1-0" && cur_vertex != "p2-0") {
+		vector<Vertex> adjnodes = g_.getAdjacent(cur_vertex);
+
+		if(adjnodes.size() == 1) {
+			path.push_back(Edge(cur_vertex, adjnodes.at(0)));
+			cur_vertex = adjnodes.back();
+		}
+		else if (rand() % 2) {
+			path.push_back(Edge(cur_vertex, adjnodes.at(0)));
+			cur_vertex = adjnodes.at(0);
+		}
+		else {
+			path.push_back(Edge(cur_vertex, adjnodes.at(1)));
+			cur_vertex = adjnodes.at(1);
+		}
+	}
   return path;
 }
 
@@ -61,6 +98,21 @@ std::vector<Edge> NimLearner::playRandomGame() const {
  */
 void NimLearner::updateEdgeWeights(const std::vector<Edge> & path) {
  /* Your code goes here! */
+ bool wins = path.back().dest[1] == '2' ? 1 : 0;
+	for (Edge e: path) {
+		if (wins) {
+			if (e.source[1] == '1')
+				g_.setEdgeWeight(e.source, e.dest, g_.getEdgeWeight(e.source, e.dest) + 1);
+			else 
+				g_.setEdgeWeight(e.source, e.dest, g_.getEdgeWeight(e.source, e.dest) - 1);
+		}
+		else {
+			if (e.source[1] == '2')
+				g_.setEdgeWeight(e.source, e.dest, g_.getEdgeWeight(e.source, e.dest) + 1);
+			else 
+				g_.setEdgeWeight(e.source, e.dest, g_.getEdgeWeight(e.source, e.dest) - 1);
+		}
+	}
 }
 
 /**
@@ -72,7 +124,7 @@ void NimLearner::labelEdgesFromThreshold(int threshold) {
       int weight = g_.getEdgeWeight(v, w);
 
       // Label all edges with positve weights as "WINPATH"
-      if (weight > threshold)           { g_.setEdgeLabel(v, w, "WIN"); }
+      if (weight > threshold) { g_.setEdgeLabel(v, w, "WIN"); }
       else if (weight < -1 * threshold) { g_.setEdgeLabel(v, w, "LOSE"); }
     }
   }

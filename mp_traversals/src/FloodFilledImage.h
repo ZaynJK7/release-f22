@@ -7,6 +7,7 @@
 #include "cs225/PNG.h"
 #include <list>
 #include <iostream>
+#include <queue>
 
 #include "colorPicker/ColorPicker.h"
 #include "imageTraversal/ImageTraversal.h"
@@ -30,5 +31,9 @@ public:
 private:
 	/** @todo [Part 2] */
 	/** add private members here*/
+  PNG* png_;
+  std::queue<PNG> queue_;
+  ImageTraversal* traversal_;
+  ColorPicker* colorPicker_;
 
 };

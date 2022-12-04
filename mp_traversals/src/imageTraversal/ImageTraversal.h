@@ -29,6 +29,8 @@ public:
   class Iterator : std::iterator<std::forward_iterator_tag, Point> {
   public:
     Iterator();
+    Iterator(ImageTraversal* searchType, Point & point, PNG & png, double tolerance);
+
 
     Iterator & operator++();
     Point operator*();
@@ -40,6 +42,10 @@ public:
   private:
     /** @todo [Part 1] */
     /** add private members here if neccesary*/
+    Point current_;
+    ImageTraversal* searchType_;
+    PNG png_;
+    double tolerance_;
 
   };
 
